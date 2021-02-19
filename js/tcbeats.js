@@ -1,5 +1,8 @@
 const frequencies = {
+    delta: [ 402, 400 ],
+    theta: [ 406, 400 ],
     alpha: [ 410, 400 ],
+    beta:  [ 422, 400 ],
 };
 
 class TCBeats {
@@ -9,22 +12,27 @@ class TCBeats {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         this.ctx = new AudioContext();
 
-        this.right = this.ctx.createOscillator();
-        this.right.type = 'sine';
-        this.rsplit = this.ctx.createChannelSplitter(2);
-        this.right.connect(this.rsplit);
-        
+        // channel merger to merge left and right oscillators
+        this.merger = this.ctx.createChannelMerger(2);
+
+        // left ear
         this.left = this.ctx.createOscillator();
         this.left.type = 'sine';
-        this.lsplit = this.ctx.createChannelSplitter(2);
-        this.left.connect(this.lsplit);
+        this.left.connect(this.merger, 0, 0);
+        this.left.start();
 
-        this.merger = this.ctx.createChannelMerger(2);
-        this.lsplit.connect(this.merger, 0, 0);
-        this.rsplit.connect(this.merger, 0, 1);
+        // right ear
+        this.right = this.ctx.createOscillator();
+        this.right.type = 'sine';
+        this.right.connect(this.merger, 0, 1);
+        this.right.start();
+
+        // default frequency pair
+        this.alpha();
+
+        // output
         this.merger.connect(this.ctx.destination);
 
-        this.start();
     }
 
     setFrequency(left_hz, right_hz) {
@@ -36,24 +44,23 @@ class TCBeats {
         this.setFrequency.apply(this, frequencies.alpha);
     }
 
-    start() {
-        this.right.start();
-        this.left.start();
+    beta() {
+        this.setFrequency.apply(this, frequencies.beta);
     }
 
-    stop() {
-        this.right.stop();
-        this.left.stop();
+    delta() {
+        this.setFrequency.apply(this, frequencies.delta);
     }
+
+    theta() {
+        this.setFrequency.apply(this, frequencies.theta);
+    }
+
 }
 
 let beats;
-
 function tcbeats() {
-
     beats = new TCBeats();
-    beats.alpha();
 }
-
 
 window.onload = tcbeats;
