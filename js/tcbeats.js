@@ -59,8 +59,11 @@ class TCBeats {
 }
 
 let beats;
-function tcbeats() {
-    beats = new TCBeats();
+function go(type) {
+    if (!beats) {
+        beats = new TCBeats();
+    }
+
+    beats[type]();
 }
 
-window.onload = tcbeats;
